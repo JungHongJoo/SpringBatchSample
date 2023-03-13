@@ -8,6 +8,7 @@ public class Application {
 
 	public static void main(String[] args) {
 		System.out.println("#################TEST MAIN START####################");
+		System.out.println("###############GIT HUB COMMIT TEST##################");
 		SpringApplication.run(Application.class, args);
 	}
 }
