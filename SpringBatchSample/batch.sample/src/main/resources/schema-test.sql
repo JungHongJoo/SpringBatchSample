@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS EVEN_MEMBER_ID;
 
 CREATE TABLE MEMBER COMMENT '회원' (
     MEMBER_ID      NUMBER(10)     NOT NULL    COMMENT '회원ID'
-    , NAME        VARCHAR(100)                COMMENT '회원명'
+    , MEMBER_NAME        VARCHAR(100)                COMMENT '회원명'
     , PRIMARY KEY (MEMBER_ID)
     );
 
