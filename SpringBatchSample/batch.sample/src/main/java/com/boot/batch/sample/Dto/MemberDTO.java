@@ -1,10 +1,11 @@
-package com.boot.batch.sample.Vo;
+package com.boot.batch.sample.Dto;
 
 import lombok.*;
 
 @Getter
 @Setter
-public class Member {
+public class MemberDTO {
     private int memberId;
     private String memberName;
+    private String memberFlag;
 }

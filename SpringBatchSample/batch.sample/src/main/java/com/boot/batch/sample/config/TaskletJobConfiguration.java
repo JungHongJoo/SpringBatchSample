@@ -15,22 +15,22 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @RequiredArgsConstructor
 @Configuration
-public class SimpleJobConfiguration {
+public class TaskletJobConfiguration {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final JobExplorer jobExplorer;
 
     @Bean
-    public Job simpleJob(){
-        return jobBuilderFactory.get("simpleJob")
-                .start(simpleStep1())
-                .next(simpleStep2())
+    public Job taskletJob(){
+        return jobBuilderFactory.get("taskletJob")
+                .start(taskletStep1())
+                .next(taskletStep2())
                 .build();
     }
 
     @Bean
-    public Step simpleStep1(){
-        return stepBuilderFactory.get("simpleStep1")
+    public Step taskletStep1(){
+        return stepBuilderFactory.get("taskletStep1")
                 .tasklet((contribution, chunkContext) -> {
                     log.info(">>>>>>This is Step1");
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().put("param1","parameterTest");
@@ -52,8 +52,8 @@ public class SimpleJobConfiguration {
     }
 
     @Bean
-    public Step simpleStep2(){
-        return stepBuilderFactory.get("simpleStep2")
+    public Step taskletStep2(){
+        return stepBuilderFactory.get("taskletStep2")
                 .tasklet((contribution, chunkContext) -> {
                     log.info(">>>>>>This is Step2");
                     //String param = (String) chunkContext.getStepContext().getStepExecution().getExecutionContext().get("param1");

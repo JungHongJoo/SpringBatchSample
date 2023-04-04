@@ -3,7 +3,7 @@ spring:
     active: local
   batch:
     job:
-      names: ${job.name:NONE}
+      names: ${job.name:NONE}Job
 
 server:
   port: 8080

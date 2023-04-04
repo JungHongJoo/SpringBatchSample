@@ -1,10 +1,9 @@
 package com.boot.batch.sample.config;
 
-import com.boot.batch.sample.Vo.Member;
+import com.boot.batch.sample.Dto.MemberDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -24,7 +23,7 @@ import javax.sql.DataSource;
 @Slf4j
 @RequiredArgsConstructor
 @Configuration
-public class ChunkJobConfiguration {
+public class CursorExampleChunkJobConfiguration {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final DataSource dataSource;
@@ -33,54 +32,56 @@ public class ChunkJobConfiguration {
     private static final int CHUNK_SIZE = 100;
 
     @Bean
-    public Job chunkJob(){
-        return jobBuilderFactory.get("chunkJob")
-                .start(chunkStep1())
+    public Job cursorExampleChunkJob() throws Exception{
+        return jobBuilderFactory.get("cursorExampleChunkJob")
+                .start(cursorExampleChunkStep())
                 .build();
     }
 
     @Bean
-    public Step chunkStep1(){
-        return stepBuilderFactory.get("chunkStep1")
-                .<Member, Member>chunk(CHUNK_SIZE)
-                .reader(chunkReaderStep())
-                .processor(chunkProcessorStep())
-                .writer(chunkWriterStep())
+    public Step cursorExampleChunkStep() throws Exception{
+        return stepBuilderFactory.get("cursorExampleChunkStep")
+                .<MemberDTO, MemberDTO>chunk(CHUNK_SIZE)
+                .reader(cursorExampleChunkStepReader())
+                .processor(cursorExampleChunkStepProcessor())
+                .writer(cursorExampleChunkStepWriter())
                 .build();
     }
 
     @Bean
     @StepScope
-    public JdbcCursorItemReader<Member> chunkReaderStep(){
-        return new JdbcCursorItemReaderBuilder<Member>()
+    public JdbcCursorItemReader<MemberDTO> cursorExampleChunkStepReader(){
+        return new JdbcCursorItemReaderBuilder<MemberDTO>()
                 .fetchSize(CHUNK_SIZE)
                 .dataSource(dataSource)
-                .rowMapper(new BeanPropertyRowMapper<>(Member.class))
-                .sql("SELECT MEMBER_ID as memberId, MEMBER_NAME as memberName FROM MEMBER")
-                .name("chunkReaderStepItemReader")
+                .rowMapper(new BeanPropertyRowMapper<>(MemberDTO.class))
+                .sql("SELECT MEMBER_ID , MEMBER_NAME , MEMBER_FLAG FROM MEMBER_INFO")
+                .name("cursorExampleChunkStepItemReader")
                 .build();
     }
 
     @Bean
     @StepScope
-    public ItemProcessor<Member,Member> chunkProcessorStep(){
-        return member -> {
-            log.info("processor : memberId > {} / memberName > {}", member.getMemberId(), member.getMemberName());
-            return member;
+    public ItemProcessor<MemberDTO, MemberDTO> cursorExampleChunkStepProcessor(){
+        return memberDTO -> {
+            log.info("processor : memberId > {} / memberName > {}", memberDTO.getMemberId(), memberDTO.getMemberName());
+            //Thread.sleep(10000);
+            //log.info("Thread Sleep End");
+            return memberDTO;
         };
     }
 
     @Bean
     @StepScope
-    public ItemWriter<Member> chunkWriterStep(){
+    public ItemWriter<MemberDTO> cursorExampleChunkStepWriter(){
         return list -> {
             log.info("writer count : {}", list.size());
         };
     }
 
     @Bean
-    public Step chunkStep2(){
-        return stepBuilderFactory.get("chunkStep2")
+    public Step cursorExampleChunkStep2(){
+        return stepBuilderFactory.get("cursorExampleChunkStep2")
                 .tasklet((contribution, chunkContext) -> {
                     log.info(">>>>>>This is Step2");
                     //String param = (String) chunkContext.getStepContext().getStepExecution().getExecutionContext().get("param1");
