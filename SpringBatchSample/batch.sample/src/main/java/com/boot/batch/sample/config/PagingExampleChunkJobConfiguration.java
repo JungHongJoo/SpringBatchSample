@@ -14,6 +14,7 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -37,7 +38,7 @@ public class PagingExampleChunkJobConfiguration {
     private final JobExplorer jobExplorer;
 
     private static final int CHUNK_SIZE = 100;
-    private static final int THREAD_POOL_SIZE = 10;
+    private static final int THREAD_POOL_SIZE = 1;
 
     @Bean
     public TaskExecutor executor() {
@@ -51,8 +52,8 @@ public class PagingExampleChunkJobConfiguration {
     }
 
     @Bean
-    public Job PagingExampleChunkJob() throws Exception{
-        return jobBuilderFactory.get("PagingExampleChunkJob")
+    public Job pagingExampleChunkJob() throws Exception{
+        return jobBuilderFactory.get("pagingExampleChunkJob")
                 .start(pagingExampleChunkStep())
                 .build();
     }
@@ -93,7 +94,7 @@ public class PagingExampleChunkJobConfiguration {
         queryProvider.setFromClause("MEMBER_INFO");
 
         Map<String, Order> sortKeys = new HashMap<>(1);
-        sortKeys.put("memberId", Order.ASCENDING);
+        sortKeys.put("MEMBER_ID", Order.ASCENDING);
 
         queryProvider.setSortKeys(sortKeys);
 
@@ -105,6 +106,10 @@ public class PagingExampleChunkJobConfiguration {
     public ItemProcessor<MemberDTO, MemberDTO> pagingExampleChunkStepProcessor(){
         return memberDTO -> {
             log.info("processor : memberId > {} / memberName > {}", memberDTO.getMemberId(), memberDTO.getMemberName());
+            if(memberDTO.getMemberId() % 2 != 0){
+                log.info("This member ID is odd : {}", memberDTO.getMemberId());
+                return null;
+            }
             //Thread.sleep(10000);
             //log.info("Thread Sleep End");
             return memberDTO;
@@ -114,9 +119,14 @@ public class PagingExampleChunkJobConfiguration {
     @Bean
     @StepScope
     public ItemWriter<MemberDTO> pagingExampleChunkStepWriter(){
-        return list -> {
+        /*return list -> {
             log.info("writer count : {}", list.size());
-        };
+        };*/
+        return new JdbcBatchItemWriterBuilder<MemberDTO>()
+                .dataSource(dataSource)
+                .sql("insert into MEMBER_READ_HIST(MEMBER_ID) values (:memberId)")
+                .beanMapped()
+                .build();
     }
 
     @Bean
@@ -124,9 +134,7 @@ public class PagingExampleChunkJobConfiguration {
         return stepBuilderFactory.get("pagingExampleChunkStep2")
                 .tasklet((contribution, chunkContext) -> {
                     log.info(">>>>>>This is Step2");
-                    //String param = (String) chunkContext.getStepContext().getStepExecution().getExecutionContext().get("param1");
-                    String param = (String) chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().get("param1");
-                    log.info("step1=>step2 parameter test / param1 : {}", param);
+
                     return RepeatStatus.FINISHED;
                 })
                 .build();
