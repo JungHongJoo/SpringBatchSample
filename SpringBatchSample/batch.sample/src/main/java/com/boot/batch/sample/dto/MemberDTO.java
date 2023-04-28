@@ -1,4 +1,4 @@
-package com.boot.batch.sample.Dto;
+package com.boot.batch.sample.dto;
 
 import lombok.*;
 

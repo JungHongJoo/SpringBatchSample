@@ -1,9 +1,8 @@
 package com.boot.batch.sample.config;
 
-import com.boot.batch.sample.Dto.MemberDTO;
+import com.boot.batch.sample.dto.MemberDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -26,7 +25,6 @@ import java.util.List;
 public class TaskletJobConfiguration {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final JobExplorer jobExplorer;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -55,8 +53,8 @@ public class TaskletJobConfiguration {
                     /////////////////PROCESSOR/////////////////
                     for(int i = 0 ; i < memberList.size() ; i++){
                         if(memberList.get(i).getMemberId() % 2 == 0){
-                            log.info("[Remove Data]memberId : {} / memberName : {} / memberFlag : {}",
-                                    memberList.get(i).getMemberId(), memberList.get(i).getMemberName(), memberList.get(i).getMemberFlag());
+                            /*log.info("[Remove Data]memberId : {} / memberName : {} / memberFlag : {}",
+                                    memberList.get(i).getMemberId(), memberList.get(i).getMemberName(), memberList.get(i).getMemberFlag());*/
                             memberList.remove(i);
                         }
                     }

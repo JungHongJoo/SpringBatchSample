@@ -1,6 +1,6 @@
 package com.boot.batch.sample.config;
 
-import com.boot.batch.sample.Dto.MemberDTO;
+import com.boot.batch.sample.dto.MemberDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -8,16 +8,15 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
@@ -26,6 +25,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -35,7 +35,6 @@ public class PagingExampleChunkJobConfiguration {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final DataSource dataSource;
-    private final JobExplorer jobExplorer;
 
     private static final int CHUNK_SIZE = 100;
     private static final int THREAD_POOL_SIZE = 1;
@@ -105,9 +104,9 @@ public class PagingExampleChunkJobConfiguration {
     @StepScope
     public ItemProcessor<MemberDTO, MemberDTO> pagingExampleChunkStepProcessor(){
         return memberDTO -> {
-            log.info("processor : memberId > {} / memberName > {}", memberDTO.getMemberId(), memberDTO.getMemberName());
+            //log.info("processor : memberId > {} / memberName > {}", memberDTO.getMemberId(), memberDTO.getMemberName());
             if(memberDTO.getMemberId() % 2 != 0){
-                log.info("This member ID is odd : {}", memberDTO.getMemberId());
+                //log.info("This member ID is odd : {}", memberDTO.getMemberId());
                 return null;
             }
             //Thread.sleep(10000);
@@ -119,24 +118,36 @@ public class PagingExampleChunkJobConfiguration {
     @Bean
     @StepScope
     public ItemWriter<MemberDTO> pagingExampleChunkStepWriter(){
+        return new MyItemWriter();
         /*return list -> {
             log.info("writer count : {}", list.size());
-        };*/
-        return new JdbcBatchItemWriterBuilder<MemberDTO>()
+            new JdbcBatchItemWriterBuilder<MemberDTO>()
                 .dataSource(dataSource)
                 .sql("insert into MEMBER_READ_HIST(MEMBER_ID) values (:memberId)")
                 .beanMapped()
                 .build();
+        };*/
     }
 
-    @Bean
-    public Step pagingExampleChunkStep2(){
-        return stepBuilderFactory.get("pagingExampleChunkStep2")
-                .tasklet((contribution, chunkContext) -> {
-                    log.info(">>>>>>This is Step2");
+    private class MyItemWriter implements ItemWriter<MemberDTO> {
+        private final JdbcBatchItemWriter<MemberDTO> itemWriter;
 
-                    return RepeatStatus.FINISHED;
-                })
-                .build();
+        private MyItemWriter() {
+            this.itemWriter = new JdbcBatchItemWriterBuilder<MemberDTO>()
+                    .dataSource(dataSource)
+                    .sql("INSERT INTO MEMBER_READ_HIST(MEMBER_ID) VALUES (:memberId)")
+                    .beanMapped()
+                    .build();
+            itemWriter.afterPropertiesSet();
+        }
+
+        @Override
+        public void write(List<? extends MemberDTO> items) throws Exception {
+            log.info("writer count : {}", items.size());
+            for(MemberDTO dto : items){
+                log.info("dto : {}", dto.getMemberId());
+            }
+            itemWriter.write(items);
+        }
     }
 }

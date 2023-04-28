@@ -1,6 +1,6 @@
 package com.boot.batch.sample.config;
 
-import com.boot.batch.sample.Dto.MemberDTO;
+import com.boot.batch.sample.dto.MemberDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -13,7 +13,6 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -27,7 +26,6 @@ public class CursorExampleChunkJobConfiguration {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final DataSource dataSource;
-    private final JobExplorer jobExplorer;
 
     private static final int CHUNK_SIZE = 100;
 
@@ -77,18 +75,5 @@ public class CursorExampleChunkJobConfiguration {
         return list -> {
             log.info("writer count : {}", list.size());
         };
-    }
-
-    @Bean
-    public Step cursorExampleChunkStep2(){
-        return stepBuilderFactory.get("cursorExampleChunkStep2")
-                .tasklet((contribution, chunkContext) -> {
-                    log.info(">>>>>>This is Step2");
-                    //String param = (String) chunkContext.getStepContext().getStepExecution().getExecutionContext().get("param1");
-                    String param = (String) chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().get("param1");
-                    log.info("step1=>step2 parameter test / param1 : {}", param);
-                    return RepeatStatus.FINISHED;
-                })
-                .build();
     }
 }

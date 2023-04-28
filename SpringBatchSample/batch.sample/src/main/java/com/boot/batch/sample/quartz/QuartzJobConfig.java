@@ -16,11 +16,13 @@ public class QuartzJobConfig {
 
     @PostConstruct
     public void run(){
-        JobDetail detail = runJobDetail(QuartzMain.class, new HashMap<>());
+        JobDetail quartzChunkDetail = runJobDetail(QuartzChunk.class, new HashMap<>());
+        JobDetail quartzTaskletDetail = runJobDetail(QuartzTasklet.class, new HashMap<>());
 
         try {
             // 크론형식 지정 후 스케줄 시작
-            scheduler.scheduleJob(detail, runJobTrigger("0/10 * * * * ?"));
+            scheduler.scheduleJob(quartzChunkDetail, runJobTrigger("0/10 * * * * ?"));
+            scheduler.scheduleJob(quartzTaskletDetail, runJobTrigger("0/15 * * * * ?"));
         } catch (SchedulerException e) {
             e.printStackTrace();
         }
