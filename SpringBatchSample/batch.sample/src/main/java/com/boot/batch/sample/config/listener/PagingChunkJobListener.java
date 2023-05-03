@@ -11,7 +11,12 @@ public class PagingChunkJobListener implements JobExecutionListener {
         log.info("PagingExampleChunkJobConfiguration start");
     }
     @Override
-    public void afterJob(JobExecution jobExecution){
+    public void afterJob(JobExecution jobExecution) {
+        /*try {
+            Thread.sleep(20000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }*/
         log.info("PagingExampleChunkJobConfiguration end");
     }
 }

@@ -1,5 +1,6 @@
 package com.boot.batch.sample.config;
 
+import com.boot.batch.sample.config.listener.TaskletJobListener;
 import com.boot.batch.sample.dto.MemberDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class TaskletJobConfiguration {
     @Bean
     public Job taskletJob(){
         return jobBuilderFactory.get("taskletJob")
+                .listener(new TaskletJobListener())
                 .start(taskletStep1())
                 //.next(taskletStep2())
                 .build();

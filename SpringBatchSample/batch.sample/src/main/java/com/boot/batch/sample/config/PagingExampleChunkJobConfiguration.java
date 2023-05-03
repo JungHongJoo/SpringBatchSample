@@ -112,6 +112,8 @@ public class PagingExampleChunkJobConfiguration {
     @StepScope
     public ItemProcessor<MemberDTO, MemberDTO> pagingExampleChunkStepProcessor(){
         return memberDTO -> {
+            /*log.info("[Processor] memberId : {} / memberName : {}", memberDTO.getMemberId(), memberDTO.getMemberName());
+            Thread.sleep(3000);*/
             memberDTO.setMemberName(memberDTO.getMemberName()+"ChunkPaging");
             return memberDTO;
         };
