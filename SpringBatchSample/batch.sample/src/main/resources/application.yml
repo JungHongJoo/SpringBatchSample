@@ -4,6 +4,9 @@ spring:
   batch:
     job:
       names: ${job.name:NONE}Job
+      chunk-size : 100
+      thread-pool : 1
+      enabled: false
 
 server:
   port: 8080

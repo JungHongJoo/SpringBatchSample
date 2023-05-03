@@ -22,8 +22,6 @@ public class QuartzTasklet extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        log.info("10초마다 Job 실행");
-
         try {
             jobLauncher.run(taskletJob, new JobParametersBuilder().addString("datetime", LocalDateTime.now().toString()).toJobParameters());
         } catch (Exception e) {

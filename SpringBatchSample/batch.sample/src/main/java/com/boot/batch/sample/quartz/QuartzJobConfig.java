@@ -1,6 +1,7 @@
 package com.boot.batch.sample.quartz;
 import lombok.RequiredArgsConstructor;
 import org.quartz.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
@@ -12,6 +13,10 @@ import static org.quartz.JobBuilder.newJob;
 @Configuration
 @RequiredArgsConstructor
 public class QuartzJobConfig {
+    @Value("${schedule.quartz.cron-expression.quartzChunk}")
+    private String quartzChunkCron;
+    @Value("${schedule.quartz.cron-expression.quartzTasklet}")
+    private String quartzTaskletCron;
     private final Scheduler scheduler;
 
     @PostConstruct
@@ -21,8 +26,8 @@ public class QuartzJobConfig {
 
         try {
             // 크론형식 지정 후 스케줄 시작
-            scheduler.scheduleJob(quartzChunkDetail, runJobTrigger("0/10 * * * * ?"));
-            scheduler.scheduleJob(quartzTaskletDetail, runJobTrigger("0/15 * * * * ?"));
+            scheduler.scheduleJob(quartzChunkDetail, runJobTrigger(quartzChunkCron));
+            scheduler.scheduleJob(quartzTaskletDetail, runJobTrigger(quartzTaskletCron));
         } catch (SchedulerException e) {
             e.printStackTrace();
         }

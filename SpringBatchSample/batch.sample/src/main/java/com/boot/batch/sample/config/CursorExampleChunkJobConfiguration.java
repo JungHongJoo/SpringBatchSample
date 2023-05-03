@@ -1,5 +1,6 @@
 package com.boot.batch.sample.config;
 
+import com.boot.batch.sample.config.listener.CursorChunkJobListener;
 import com.boot.batch.sample.dto.MemberDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,11 +9,11 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -27,11 +28,13 @@ public class CursorExampleChunkJobConfiguration {
     private final StepBuilderFactory stepBuilderFactory;
     private final DataSource dataSource;
 
-    private static final int CHUNK_SIZE = 100;
+    @Value("${spring.batch.job.chunk-size}")
+    private int chunkSize;
 
     @Bean
     public Job cursorExampleChunkJob() throws Exception{
         return jobBuilderFactory.get("cursorExampleChunkJob")
+                .listener(new CursorChunkJobListener())
                 .start(cursorExampleChunkStep())
                 .build();
     }
@@ -39,7 +42,7 @@ public class CursorExampleChunkJobConfiguration {
     @Bean
     public Step cursorExampleChunkStep() throws Exception{
         return stepBuilderFactory.get("cursorExampleChunkStep")
-                .<MemberDTO, MemberDTO>chunk(CHUNK_SIZE)
+                .<MemberDTO, MemberDTO>chunk(chunkSize)
                 .reader(cursorExampleChunkStepReader())
                 .processor(cursorExampleChunkStepProcessor())
                 .writer(cursorExampleChunkStepWriter())
@@ -50,10 +53,10 @@ public class CursorExampleChunkJobConfiguration {
     @StepScope
     public JdbcCursorItemReader<MemberDTO> cursorExampleChunkStepReader(){
         return new JdbcCursorItemReaderBuilder<MemberDTO>()
-                .fetchSize(CHUNK_SIZE)
+                .fetchSize(chunkSize)
                 .dataSource(dataSource)
                 .rowMapper(new BeanPropertyRowMapper<>(MemberDTO.class))
-                .sql("SELECT MEMBER_ID , MEMBER_NAME , MEMBER_FLAG FROM MEMBER_INFO")
+                .sql("SELECT MEMBER_ID , MEMBER_NAME FROM MEMBER_INFO WHERE MEMBER_FLAG_CURSOR = 'N'")
                 .name("cursorExampleChunkStepItemReader")
                 .build();
     }
@@ -62,9 +65,7 @@ public class CursorExampleChunkJobConfiguration {
     @StepScope
     public ItemProcessor<MemberDTO, MemberDTO> cursorExampleChunkStepProcessor(){
         return memberDTO -> {
-            log.info("processor : memberId > {} / memberName > {}", memberDTO.getMemberId(), memberDTO.getMemberName());
-            //Thread.sleep(10000);
-            //log.info("Thread Sleep End");
+            memberDTO.setMemberName(memberDTO.getMemberName()+"ChunkCursor");
             return memberDTO;
         };
     }
@@ -73,7 +74,7 @@ public class CursorExampleChunkJobConfiguration {
     @StepScope
     public ItemWriter<MemberDTO> cursorExampleChunkStepWriter(){
         return list -> {
-            log.info("writer count : {}", list.size());
+            //log.info("writer count : {}", list.size());
         };
     }
 }

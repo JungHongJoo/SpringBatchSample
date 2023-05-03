@@ -24,8 +24,6 @@ public class QuartzChunk extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        log.info("10초마다 Job 실행");
-
         try {
             jobLauncher.run(cursorExampleChunkJob, new JobParametersBuilder().addString("datetime", LocalDateTime.now().toString()).toJobParameters());
             jobLauncher.run(pagingExampleChunkJob, new JobParametersBuilder().addString("datetime", LocalDateTime.now().toString()).toJobParameters());

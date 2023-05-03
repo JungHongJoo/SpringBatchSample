@@ -1,4 +1,7 @@
 spring:
+  config:
+    import:
+      - schedule.yml
   quartz:
     job-store-type: jdbc
     jdbc:

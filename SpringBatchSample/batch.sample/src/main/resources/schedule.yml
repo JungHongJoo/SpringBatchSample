@@ -1,0 +1,5 @@
+schedule:
+  quartz:
+    cron-expression:
+      quartzChunk: "0/10 * * * * ?"
+      quartzTasklet: "0/15 * * * * ?"
