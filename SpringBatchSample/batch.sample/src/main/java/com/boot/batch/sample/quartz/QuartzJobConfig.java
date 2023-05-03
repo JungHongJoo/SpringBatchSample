@@ -10,7 +10,7 @@ import java.util.Map;
 
 import static org.quartz.JobBuilder.newJob;
 
-@Configuration
+//@Configuration
 @RequiredArgsConstructor
 public class QuartzJobConfig {
     @Value("${schedule.quartz.cron-expression.quartzChunk}")

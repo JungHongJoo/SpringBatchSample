@@ -1,4 +1,4 @@
-package com.boot.batch.sample.config.listener;
+package com.boot.batch.sample.batch.listener;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobExecution;

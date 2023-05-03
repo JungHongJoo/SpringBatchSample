@@ -3,10 +3,11 @@ spring:
     active: local
   batch:
     job:
-      names: ${job.name:NONE}Job
+      names: "pagingExampleChunkJob"
+      enabled: true
       chunk-size : 100
       thread-pool : 1
-      enabled: false
+      #enabled: false
 
 server:
   port: 8080
@@ -14,5 +15,4 @@ server:
     context-path: /
     encoding:
       charset: UTF-8
-      #enabled: true
       force: true

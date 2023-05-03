@@ -1,6 +1,6 @@
-package com.boot.batch.sample.config;
+package com.boot.batch.sample.batch;
 
-import com.boot.batch.sample.config.listener.PagingChunkJobListener;
+import com.boot.batch.sample.batch.listener.PagingChunkJobListener;
 import com.boot.batch.sample.dto.MemberDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
